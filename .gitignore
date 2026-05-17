@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE / editor
+.vscode/
+.idea/
+.claude/
+*.swp
+
+# macOS
+.DS_Store
+
+# ML artifacts
+*.pkl
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.h5
+wandb/
+mlruns/
+runs/
+
+# Environment
+.env
+.env.local
