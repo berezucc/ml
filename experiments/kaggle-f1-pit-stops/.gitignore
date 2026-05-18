@@ -3,4 +3,5 @@ _run.py
 _run.log
 submission.csv
 catboost_info/
+oof/
 PLAN.md
