@@ -1,0 +1,6 @@
+data/*.csv
+_run.py
+_run.log
+submission.csv
+catboost_info/
+PLAN.md
