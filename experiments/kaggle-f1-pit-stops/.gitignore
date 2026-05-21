@@ -2,6 +2,9 @@ data/*.csv
 _run.py
 _run.log
 submission.csv
+submission_v*.csv
+external/
 catboost_info/
 oof/
+resnet_run.log
 PLAN.md
