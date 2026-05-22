@@ -112,13 +112,19 @@ final blend; the score comes from two other submissions read from a
 private dataset. With only the published data, the own-model ceiling
 is around 0.949.
 
-## What I would try next
+## Things tried that did not help
 
-Per-fold target encoding matrices instead of a single OOF column. The
-current pattern leaks a small amount of signal when a row's TE was
-computed using data that lands in the same fold's validation set.
-Per-fold matrices remove this. Expected OOF gain 0.001 or so, possibly
-more on the LB given how poorly the current TE generalises.
+Per-fold target encoding matrices. Built a leak-free version that
+recomputes TE statistics from each fold's training data only and
+applies them to both the training and validation rows of that fold.
+LightGBM OOF dropped from 0.94248 (current single-OOF TE) to 0.93870.
+Reading: the leak in the current TE pattern was inflating OOF more
+than helping generalisation. The TE features on this problem do not
+carry real predictive power beyond what CatBoost extracts natively;
+the apparent gain from TE in v4 came from the OOF-measurement leak,
+not from improved test-time prediction.
+
+## What to try next
 
 Optuna tuning on the bagged CatBoost. The current configuration uses
 sensible defaults but was not tuned. A search over depth, learning
@@ -128,6 +134,9 @@ next obvious move. Expected gain 0.001 to 0.003.
 Pseudo-labelling on test rows where the stacker is highly confident
 (p above 0.95 or below 0.05). Train an extra CatBoost on the augmented
 set. Modest expected gain with some confirmation-bias risk.
+
+Drop the TE features entirely and remeasure. Given the per-fold result,
+the existing TE may be net-negative under honest evaluation.
 
 ## Files
 
