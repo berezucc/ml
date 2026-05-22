@@ -1,19 +1,22 @@
 """Blend cached OOFs with an optional external anchor submission and write submission.csv.
 
 Usage:
-    python blend.py                  # 4-model logit-rank blend only
-    python blend.py --anchor PATH    # blend our LR stacker with the anchor
-    python blend.py --weight 0.05    # control anchor blend weight
+    python blend.py                          # LR stacker, no anchor
+    python blend.py --stacker gbdt           # LightGBM stacker instead of LR
+    python blend.py --anchor PATH            # blend stacker with the anchor
+    python blend.py --anchor PATH --weight 0.05
 """
 import argparse
 from pathlib import Path
 
+import lightgbm as lgb
 import numpy as np
 import pandas as pd
 from scipy.special import expit, logit
 from scipy.stats import rankdata
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import StratifiedKFold
 
 from features import TARGET, build_features
 
@@ -40,13 +43,39 @@ def load_cached_oofs(names):
     return oofs, preds
 
 
-def stacker(oofs, preds, y):
+def lr_stacker(oofs, preds, y):
     names = list(oofs)
     X_oof = np.column_stack([logit(to_rank(oofs[n])) for n in names])
     X_te  = np.column_stack([logit(to_rank(preds[n])) for n in names])
     lr = LogisticRegression(C=10, max_iter=500).fit(X_oof, y)
-    coefs = dict(zip(names, lr.coef_[0].round(4)))
-    return lr.predict_proba(X_oof)[:, 1], lr.predict_proba(X_te)[:, 1], coefs
+    return lr.predict_proba(X_oof)[:, 1], lr.predict_proba(X_te)[:, 1], dict(zip(names, lr.coef_[0].round(4)))
+
+
+def gbdt_stacker(oofs, preds, y, n_folds=5, seed=42):
+    """Stack with a small LightGBM. OOF predictions over 5 internal folds."""
+    names = list(oofs)
+    X_oof = np.column_stack([logit(to_rank(oofs[n])) for n in names])
+    X_te  = np.column_stack([logit(to_rank(preds[n])) for n in names])
+    oof_pred = np.zeros(len(y))
+    te_pred  = np.zeros(len(X_te))
+    params = dict(
+        objective='binary', metric='auc',
+        learning_rate=0.02, num_leaves=15, min_child_samples=200,
+        feature_fraction=0.9, bagging_fraction=0.9, bagging_freq=1,
+        lambda_l2=1.0, verbose=-1, seed=seed, n_jobs=-1,
+    )
+    for tr, va in StratifiedKFold(n_folds, shuffle=True, random_state=seed).split(X_oof, y):
+        m = lgb.train(
+            params,
+            lgb.Dataset(X_oof[tr], y[tr]),
+            500,
+            valid_sets=[lgb.Dataset(X_oof[va], y[va])],
+            callbacks=[lgb.early_stopping(30), lgb.log_evaluation(0)],
+        )
+        oof_pred[va] = m.predict(X_oof[va], num_iteration=m.best_iteration)
+        te_pred += m.predict(X_te, num_iteration=m.best_iteration) / n_folds
+    importance = dict(zip(names, m.feature_importance(importance_type='gain').round(1)))
+    return oof_pred, te_pred, importance
 
 
 def main():
@@ -55,6 +84,7 @@ def main():
                         help='external submission.csv to use as logit-rank anchor')
     parser.add_argument('--weight', type=float, default=0.05,
                         help='weight assigned to our stacker when anchored')
+    parser.add_argument('--stacker', choices=['lr', 'gbdt'], default='lr')
     parser.add_argument('--out', type=Path, default=Path('submission.csv'))
     args = parser.parse_args()
 
@@ -68,9 +98,13 @@ def main():
     for n in names:
         print(f'  {n:<8} OOF AUC {roc_auc_score(y, oofs[n]):.5f}')
 
-    stack_oof, stack_pred, coefs = stacker(oofs, preds, y)
-    print('LR coefs:', coefs)
-    print(f'stacker OOF AUC: {roc_auc_score(y, stack_oof):.5f}')
+    if args.stacker == 'lr':
+        stack_oof, stack_pred, meta = lr_stacker(oofs, preds, y)
+        print(f'LR coefs: {meta}')
+    else:
+        stack_oof, stack_pred, meta = gbdt_stacker(oofs, preds, y)
+        print(f'GBDT gain importance: {meta}')
+    print(f'{args.stacker} stacker OOF AUC: {roc_auc_score(y, stack_oof):.5f}')
 
     test = pd.read_csv(DATA_DIR / 'test.csv')
     sorted_ids = (test.sort_values(['Race', 'Year', 'Driver', 'LapNumber'])

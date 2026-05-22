@@ -118,11 +118,32 @@ Per-fold target encoding matrices. Built a leak-free version that
 recomputes TE statistics from each fold's training data only and
 applies them to both the training and validation rows of that fold.
 LightGBM OOF dropped from 0.94248 (current single-OOF TE) to 0.93870.
-Reading: the leak in the current TE pattern was inflating OOF more
-than helping generalisation. The TE features on this problem do not
-carry real predictive power beyond what CatBoost extracts natively;
-the apparent gain from TE in v4 came from the OOF-measurement leak,
-not from improved test-time prediction.
+The leak in the current TE pattern was inflating OOF more than
+helping generalisation. The TE features on this problem do not carry
+real predictive power beyond what CatBoost extracts natively; the
+apparent gain from TE in v4 came from the OOF-measurement leak, not
+from improved test-time prediction.
+
+GBDT stacker (small LightGBM, num_leaves=15) over the four model
+OOFs. OOF 0.94897 vs LR stacker 0.94924. LR wins, probably because
+LR's implicit linear regularisation is well-suited to combining four
+highly correlated GBDT-flavoured signals.
+
+## Diagnostics
+
+Adversarial validation. Train LightGBM to classify train vs test.
+With all features: AUC 1.00 (perfect drift), driven entirely by
+`te_Race`. Dropping the TE columns: AUC 0.50 (no drift). The TE
+features have a train/test distribution mismatch because train uses
+per-fold aggregates while test uses a full-train aggregate.
+
+SHAP on a fold-0 CatBoost (1200 iter), 20k validation sample. Top
+features by mean |SHAP|: Year (0.86), TyreLife (0.53),
+te_Compound_x_Stint (0.39), Race (0.39), LapTime_Delta (0.36),
+tyre_life_normalised (0.34). Year dominates because of the 2023
+regime split. Oracle ranks 14 with mean |SHAP| 0.09, lower than
+expected, but it is only valid for ~67% of rows so the average is
+diluted. Plots in `diagnostics_out/`.
 
 ## What to try next
 

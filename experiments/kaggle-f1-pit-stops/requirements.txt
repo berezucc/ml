@@ -11,6 +11,8 @@ torch>=2.1
 
 matplotlib>=3.7
 seaborn>=0.12
+shap>=0.44
+optuna>=3.5
 
 jupyter>=1.0
 kaggle>=1.6

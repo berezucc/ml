@@ -6,5 +6,7 @@ submission_v*.csv
 external/
 catboost_info/
 oof/
-resnet_run.log
+*_run.log
+tune_catboost.log
+diagnostics_out/*.log
 PLAN.md
