@@ -10,8 +10,9 @@ Binary classification — will a car pit on the next lap? Metric is ROC-AUC.
 | CatBoost only | 0.94738 |
 | Bagged CatBoost (3 seeds) + OOF target encoding | 0.94776 |
 | + sklearn MLP + isotonic calibration | 0.94773 |
-| 4-model LR stacker including the ResNet | 0.94924 OOF |
-| 4-model stacker blended with Anthony Therrien's public NN submission, w=0.05 | **0.95452** |
+| 4-model LR stacker including the ResNet | 0.94943 OOF |
+| Stacker blended with a public anchor, w=0.05 | 0.95452 |
+| Stacker blended with a 4-anchor logit-rank cascade, w=0.05 | **0.95453** |
 
 The 0.95+ leaderboard is built on a small set of shared submissions; with
 only the competition data, our ceiling sits around 0.949. The blend script

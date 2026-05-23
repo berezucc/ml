@@ -99,11 +99,13 @@ matches the training base rate of 0.199 to four decimal places.
 
 | Submission | Public LB | Note |
 | --- | --- | --- |
-| CatBoost only | 0.9474 | baseline |
-| Bagged CatBoost + TE | 0.9478 | best from own model alone |
-| + sklearn MLP, isotonic | 0.9477 | flat |
-| Stacker including residual MLP | 0.9492 OOF | own-model ceiling |
-| Blend with public anchor, w=0.05 | 0.9545 | external help |
+| CatBoost only | 0.94738 | baseline |
+| Bagged CatBoost + TE | 0.94776 | best from own model alone |
+| + sklearn MLP, isotonic | 0.94773 | flat |
+| Stacker including residual MLP | 0.94924 OOF | own-model ceiling |
+| Single-anchor blend (Anthony) + stacker w=0.05 | 0.95452 | external help |
+| Tuned-CB stacker + single anchor w=0.05 | 0.95452 | OOF +0.0002, LB flat |
+| Four-anchor cascade + stacker w=0.05 | **0.95453** | +0.00001, all 4 anchors are near-duplicates |
 
 The 0.95+ leaderboard is built from a small set of shared submissions
 that public blender notebooks pass around. Reproducing one of those
