@@ -145,19 +145,48 @@ regime split. Oracle ranks 14 with mean |SHAP| 0.09, lower than
 expected, but it is only valid for ~67% of rows so the average is
 diluted. Plots in `diagnostics_out/`.
 
-## What to try next
+## Optuna tuning on CatBoost
 
-Optuna tuning on the bagged CatBoost. The current configuration uses
-sensible defaults but was not tuned. A search over depth, learning
-rate, l2 leaf reg, bagging temperature, and random strength is the
-next obvious move. Expected gain 0.001 to 0.003.
+30-trial search over depth, learning rate, l2 leaf reg, bagging
+temperature, random strength on a single-fold (fold 0) validation.
+Total wall time about 2 hours. Best params:
+
+```
+iterations: 2500
+depth: 10
+learning_rate: 0.065
+l2_leaf_reg: 3.97
+bagging_temperature: 0.156
+random_strength: 0.89
+```
+
+Best fold-0 AUC 0.94839 vs the existing depth-8 default of about 0.9474.
+
+Trained these params across all 5 folds (`train_tuned_cb.py`,
+`oof/cb_tuned.npz`). Per-fold AUCs: 0.94839, 0.94709, 0.94941, 0.94876,
+0.94842. Full OOF 0.94841, which is worse than two of the three existing
+CB seeds. The single-fold tune overfits to fold 0.
+
+Swapping the tuned CB in for the weakest existing seed (cb_1, OOF
+0.94812) gave a 3-bag OOF of 0.94936, up from 0.94914 (+0.0002). The
+LR stacker over (lgb, new-bag, xgb, resnet) reaches OOF 0.94943, up
+from 0.94924. The anchored submission with Anthony at w=0.05 is
+unchanged on the LB at 0.95452, because the blend at that weight is
+dominated by the anchor.
+
+## What to try next
 
 Pseudo-labelling on test rows where the stacker is highly confident
 (p above 0.95 or below 0.05). Train an extra CatBoost on the augmented
 set. Modest expected gain with some confirmation-bias risk.
 
-Drop the TE features entirely and remeasure. Given the per-fold result,
-the existing TE may be net-negative under honest evaluation.
+Multi-fold Optuna instead of single-fold. The single-fold tune overfits.
+Five-fold Optuna would take ten times as long but the best params should
+generalise better across folds.
+
+Drop the TE features entirely and remeasure. Adversarial validation
+shows the TE columns are the only source of train/test distribution
+drift (AUC 1.00 with TE, 0.50 without).
 
 ## Files
 
