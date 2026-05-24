@@ -8,7 +8,7 @@ Machine learning experiments, from-scratch implementations, coursework, and note
 |---|---|
 | `implementations/` | Small from-scratch implementations of ML algorithms and primitives |
 | `experiments/` | Self-contained Kaggle entries and side projects |
-| `coursework/` | Homework and labs from ML courses (TMU) |
+| `fundamentals/` | Homework and worked exercises from ML courses (TMU + Kaggle Learn) |
 | `notes/` | Topic notes and cheatsheets |
 | `paper-notes/` | Paper notes (in progress) |
 
