@@ -35,3 +35,6 @@ runs/
 # Environment
 .env
 .env.local
+
+# Local planning docs (kept on disk, not tracked)
+experiments/HANDOFF.md
