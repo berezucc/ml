@@ -9,6 +9,7 @@ Homework, labs, and worked exercises from machine-learning courses.
 | `clustering/` | Clustering algorithms | TMU |
 | `neural-nets/` | Neural networks | TMU |
 | `deep-learning/` | Intro deep learning with Keras (single neurons → DNNs → SGD → overfitting → dropout/BN → binary classification) | Kaggle Learn |
+| [`bootstrap-and-bias-variance/`](bootstrap-and-bias-variance/) | Bootstrap CIs (percentile/basic/BCa), logistic regression bootstrap SE vs Fisher SE, and the bias-variance U-curve on polynomial regression. | from scratch |
 
 ## `deep-learning/` exercises
 
