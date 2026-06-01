@@ -3,6 +3,10 @@
 Kaggle: [Playground Series S6E5](https://www.kaggle.com/competitions/playground-series-s6e5).
 Binary classification — will a car pit on the next lap? Metric is ROC-AUC.
 
+## Leaderboard
+<img width="973" height="134" alt="image" src="https://github.com/user-attachments/assets/323c75de-5125-43c8-b81f-640c12117678" />
+
+
 ## Scores
 
 | Submission | Public LB |
