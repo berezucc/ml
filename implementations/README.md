@@ -10,6 +10,7 @@ past what the algorithm requires.
 | [bpe-tokenizer](bpe-tokenizer/) | Byte-level BPE, GPT-2 style. **0.3500** tok/byte vs tiktoken **0.3031** (vocab 2k vs 50k); pure-Python encoder **2.9x** slower than the Rust tiktoken. |
 | [lora-from-scratch](lora-from-scratch/) | LoRA wrapping `nn.Linear` / HF `Conv1D`, fine-tuning `distilgpt2` on tiny-shakespeare. **0.49%** trainable params (405k of 82M), **115 s** on M2 Max MPS. |
 | [lstm-from-scratch](lstm-from-scratch/) | Char-level LSTM language model in pure NumPy, BPTT by hand. Loss **4.17 → 1.76** on tiny-shakespeare in **417 s** (5000 iters) on a single M2 Max CPU core. Includes a finite-difference gradient check (worst rel err **4.1e-7**). |
+| [drift-detection](drift-detection/) | PSI, KS, Wasserstein, KL/JS divergence and Welch's t-test in NumPy, each checked against SciPy (**\|diff\| < 1e-9**). Applied to a logistic-regression model with graded covariate shift: ranks features from PSI **1.06** (major) down to **0.00** (untouched) while held-out AUC barely moves. |
 
 See [`HANDOFF.md`](HANDOFF.md) for the build conventions (one to three
 files per project, hardcoded constants, asserts in `__main__`, concrete
