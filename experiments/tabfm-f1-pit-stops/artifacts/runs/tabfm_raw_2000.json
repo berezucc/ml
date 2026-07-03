@@ -1,0 +1,1 @@
+{"model": "TabFM", "features": "raw", "train_rows": 2000, "auc": 0.933555743953818, "seconds": 173.10966396331787}

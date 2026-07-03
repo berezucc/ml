@@ -1,0 +1,23 @@
+# TabFM source checkout (clone of google-research/tabfm)
+vendor/
+
+# Environment
+.venv/
+
+# Cached features / results are cheap to regenerate
+artifacts/*.parquet
+artifacts/*.npz
+
+# CatBoost training logs
+catboost_info/
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# OS / editor
+.DS_Store
+
+# run logs
+artifacts/run.log

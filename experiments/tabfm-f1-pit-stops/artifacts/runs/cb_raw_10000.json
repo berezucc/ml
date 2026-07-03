@@ -1,0 +1,1 @@
+{"model": "CatBoost", "features": "raw", "train_rows": 10000, "auc": 0.9281652094564423, "seconds": 1.466109037399292}
